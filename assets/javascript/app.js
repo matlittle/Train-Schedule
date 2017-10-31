@@ -38,30 +38,42 @@ function addTrain() {
 database.ref('trains').on("child_added", function(snapshot) {
 	var data = snapshot.val();
 
-	console.log(data);
-
-	$("#train-table-body").empty();
-
-	var name = data.name;
-	var dest = data.destination;
-	var firstTime = data.firstTime;
-	var freq = data.frequency;
-
-	var next = 0; // next time
-	var away = 0; // time away
+	var away = timeAway(data.frequency, data.firstTime); 
+	var next = nextTime(away); 
 
 	var tRow = $("<tr>")
 
-	var tD1 = $("<td>").text(name);
-	var tD2 = $("<td>").text(dest);
-	var tD3 = $("<td>").text(freq);
-	var tD4 = $("<td>").text(next); //months worked
+	var tD1 = $("<td>").text(data.name);
+	var tD2 = $("<td>").text(data.destination);
+	var tD3 = $("<td>").text(data.frequency);
+	var tD4 = $("<td>").text(next);
 	var tD5 = $("<td>").text(away);
 
 	$(tRow).append(tD1, tD2, tD3, tD4, tD5)
 	$("#train-table-body").append(tRow);
 
 });
+
+function timeAway(freq, first) {
+	console.log(freq, first);
+	var diff = moment().diff(moment(first, "hh:mm"), "minutes");
+
+	console.log(diff);
+
+	if(diff < 0) {
+		var diff = moment().diff(moment(first, "hh:mm").subtract(1, "days"), "minutes")
+	}
+
+	console.log(diff);
+
+	console.log(freq - (diff % freq));
+
+	return (freq - (diff % freq));
+}
+
+function nextTime(until) {
+	return moment().add(until, "minutes").format("HH:mm");
+}
 
 
 
