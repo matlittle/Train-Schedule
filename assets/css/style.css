@@ -1,0 +1,39 @@
+#train-graph {
+	width: 100%;
+	position: relative;
+}
+
+#graph-name-head {
+	width: 20%;
+}
+
+.bar-cell {
+	height: 1.4px;
+	vertical-align: top;
+}
+
+.bar-cell .bar-time {
+	display: none;
+	vertical-align: top;
+	width: 25px;
+	text-align: center;
+	position: absolute;
+	right: -35px;
+	box-shadow: rgba(0, 0, 0, 0.6) 0 1px 4px;
+	text-shadow: rgba(255, 255, 255, 0.8) 0 1px 0;
+	border-radius: 3px;
+}
+
+.bar-cell:hover .bar-time {
+	display: block;
+}
+
+.bar {
+	height: 100%;
+	background-color: green;
+	border-radius: 5px;
+	width: 0;
+	display: inline;
+	position: relative;
+	box-shadow: rgba(0, 0, 0, 0.6) 0 1px 1px;
+}

@@ -11,32 +11,32 @@ firebase.initializeApp(config);
 
 var database = firebase.database();
 
+var animating;
 
 // when user enters data, capture info and push to Firebase database
 function addTrain() {
 	event.preventDefault();
 
-	var name = $("#train-name").val().trim();
-	var dest = $("#train-destination").val().trim();
-	var first = $("#train-first-time").val().trim();
-	var freq = $("#train-frequency").val().trim();
+	var trainObj = {
+		name: $("#train-name").val().trim(),
+		destination: $("#train-destination").val().trim(),
+		firstTime: $("#train-first-time").val().trim(),
+		frequency: $("#train-frequency").val().trim()
+	}
 
 	$("#train-name").val("");
 	$("#train-destination").val("");
 	$("#train-first-time").val("");
 	$("#train-frequency").val("");
 
-	database.ref('trains').push({
-		name: name,
-		destination: dest, 
-		firstTime: first,
-		frequency: freq
-	});
+	database.ref('trains').push(trainObj);
 }
 
-// when data changes in Firebase, pull data and populate table
+// when data is added in Firebase, pull data and populate table
 database.ref('trains').on("child_added", function(snapshot) {
 	var data = snapshot.val();
+
+	console.log(data);
 
 	var away = timeAway(data.frequency, data.firstTime); 
 	var next = nextTime(away); 
@@ -104,26 +104,46 @@ function updateTable(arr) {
 }
 
 function updateGraph(arr) {
-	$("#train-graph").empty();
-
-	console.log(arr);
+	$("#train-graph-body").empty();
 
 	for(train of arr) {
 		var name = $( $(train).children()[0] ).text();
-		var away =  parseInt($(train.lastChild).text());
+		var away = parseInt($(train.lastChild).text());
 
-		console.log("Name: ", name, "  Away: ", away);
+		var awayPercent = ((away/60)*100);
 
-		var row = $("<tr>");
+		if(awayPercent <= 100){
+			var row = $("<tr>");
 
-		var nameCell = $("<td class='graph-name'>").text(name);
-		var awaySpan = $("<span class='away-graph'>").css("width", `${away/100}%`);
-		var remSpan = $("<span class='rem-graph'>").css("width", `${100- (away/100)}%`);
+			var nameCell = $("<td class='name-cell'>").text(name);
 
-		var graphCell = $("<td class='graph-line'>").append(awaySpan, remSpan);
+			var bar = $("<div class='bar'>").attr("data-width", `${awayPercent}%`);
+			var time = $("<span class='bar-time'>").text(away);
 
-		$("#train-graph").append( $(row).append(nameCell, graphCell) );
+			var graphCell = $("<td class='bar-cell'>").append( $(bar).append(time) );
+
+			$("#train-graph-body").append( $(row).append(nameCell, graphCell) );
+		}
 	}
+
+	animateGraph($(".bar"), 0);
+}
+
+function animateGraph(bars, i) {
+	clearTimeout(animating);
+
+	animating = setTimeout( function() {
+		if(i < bars.length){
+			$(bars[i]).animate({
+				width: $(bars[i]).attr("data-width")
+			}, 800)
+
+			barTimer = setTimeout(function(){
+				i+=1;
+				animateGraph(bars, i);
+			}, 150);
+		}
+	}, 200)
 }
 
 
